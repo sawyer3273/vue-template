@@ -22,26 +22,6 @@ export default [
     label: 'Админка'
   },
   {
-    to: '/admin/actors',
-    icon: mdiAccountStar,
-    label: 'Актеры'
-  },
-  {
-    to: '/admin/quiz',
-    icon: mdiHelpBoxMultiple,
-    label: 'Квиз'
-  },
-  {
-    to: '/admin/intuition',
-    icon: mdiLightbulbOn,
-    label: 'КиноИнтуиция'
-  },
-  {
-    to: '/admin/cast',
-    icon: mdiAccountGroup,
-    label: 'Каст'
-  },
-  {
     to: '/admin/Dashboard',
     icon: mdiMonitor,
     label: 'Dashboard'

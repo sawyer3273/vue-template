@@ -13,7 +13,6 @@ import {
 import * as chartConfig from '@/components/Charts/chart.config.js'
 import LineChart from '@/components/Charts/LineChart.vue'
 import { userService } from '~/utils/services/user.service'
-import { dataService } from '~/utils/services/data.service'
 definePageMeta({
   middleware: 'auth' 
 })
