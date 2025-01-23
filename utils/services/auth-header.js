@@ -3,6 +3,7 @@ import {parseUserObject} from './user.service'
 import { handleResponse } from './response';
 const baseURL = ''
 import Cookie from 'cookie'
+import { useUserStore } from '@/stores/user'
 
 export async function authHeader(needToken = true, headers = {'Content-Type': 'application/json'}) {
     // return authorization header with jwt token
