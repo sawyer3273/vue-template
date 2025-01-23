@@ -1,0 +1,346 @@
+.loader-global {
+	background: rgba(128, 128, 128, 0.2);
+	width: 100%;
+	height: 100%;
+	z-index: 11111;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+.pl-10-imp {
+	padding-left: 2.5rem !important;
+}
+.form-label {
+	font-weight: bold;
+}
+
+.text-center-cust {
+	text-align: center;
+}
+
+.transparent {
+	background: transparent;
+}
+.img-box {
+	margin: 45px 0;
+}
+  
+.img-box img {
+width: 100%;
+-webkit-animation: upDown 5s infinite;
+		animation: upDown 5s infinite;
+}
+
+@-webkit-keyframes upDown {
+	0% {
+	  -webkit-transform: translateY(-45px);
+			  transform: translateY(-45px);
+	}
+	50% {
+	  -webkit-transform: translateY(45px);
+			  transform: translateY(45px);
+	}
+	100% {
+	  -webkit-transform: translateY(-45px);
+			  transform: translateY(-45px);
+	}
+  }
+  
+  @keyframes upDown {
+	0% {
+	  -webkit-transform: translateY(-45px);
+			  transform: translateY(-45px);
+	}
+	50% {
+	  -webkit-transform: translateY(45px);
+			  transform: translateY(45px);
+	}
+	100% {
+	  -webkit-transform: translateY(-45px);
+			  transform: translateY(-45px);
+	}
+  }
+
+  .yellow-shine:hover {
+	box-shadow: 0 0 5px #dda323;
+	border-color: #dda323 !important;
+	transition: all .1s ease-out;
+	-webkit-transform: scale(1.015);
+		transform: scale(1.015);
+  }
+  .yellow-shine-large:hover {
+	box-shadow: 0 0 7px #dda323;
+	border: 2px solid;
+	border-color: #dda323 !important;
+	transition: all .1s ease-out;
+	-webkit-transform: scale(1.04);
+		transform: scale(1.04);
+  }
+  
+  .selectedA {
+	box-shadow: 0 0 7px #0fc206;
+    border: 2px solid #0c9a05;
+	-webkit-transform: scale(1.2);
+		transform: scale(1.2);
+  }
+  .selectedB {
+	box-shadow: 0 0 7px #0fc206;
+    border: 2px solid #0c9a05;
+	-webkit-transform: scale(1.07);
+		transform: scale(1.07);
+  }
+
+  .carousel__slide {
+	align-items: start !important;
+  }
+
+  .arrow-css {
+	transform: rotate(45deg);
+	border-style: solid;
+	width: 10px;
+	z-index: 10;
+	opacity: 0.55;
+  }
+
+  .right {
+	border-width: 5px 5px 20px 20px;
+	border-color: #1753ad #1753ad transparent transparent;
+	top: 35vh;
+    right: -16px;
+  }
+
+  .left {
+	border-width: 20px 20px 5px 5px;
+	border-color: transparent transparent #1753ad #1753ad;   
+	top: 35vh;
+    left: -16px;
+  }
+
+.h-77 {
+	height: 77vh;
+}
+
+.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+.krest {
+	top: 15%;
+}
+
+.w-for-underline {
+	width: calc(100% - 2.75rem);
+	top: 42%;
+	opacity: 0.75;
+}
+.textWithShadow {
+    text-shadow: #080807 0px 0 2px;
+}
+.boxWithShadow {
+    box-shadow: #080807 3px 0 2px;
+}
+label {
+	font-weight: bold;
+}
+.notclickable {
+    pointer-events: none;
+}
+.w-inherit {
+	width: inherit;
+}
+
+
+
+.button-39 {
+  white-space: nowrap;
+  background-color: #FFFFFF;
+  border: 1px solid rgb(209,213,219);
+  border-radius: .5rem;
+  box-sizing: border-box;
+  color: #111827;
+  font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  padding: .25rem 0.5rem;
+  text-align: center;
+  text-decoration: none #D1D5DB solid;
+  text-decoration-thickness: auto;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-39:hover {
+  background-color: rgb(249,250,251);
+}
+
+.button-39:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.button-39:focus-visible {
+  box-shadow: none;
+}
+
+.btn-grad {
+    background-image: linear-gradient(to right, #3b82f6 0%, #485279  51%, #3b82f6  100%);
+    margin: 10px;
+    padding: 15px 45px;
+    text-align: center;
+    text-transform: uppercase;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;            
+    box-shadow: 0 0 20px #c7c7c7;
+    border-radius: 10px;
+    display: block;
+}
+.btn-grad-dark {
+    box-shadow: 0 0 20px #483e3e;
+}
+.bg-main-game {
+	background-image: linear-gradient(to top, #a4c6ec 0%, #e7eef8 100%)
+}
+@media (max-width: 500px) {
+	.btn-grad {
+		margin: 4px 10px;
+	}
+}
+.btn-grad:hover {
+    background-position: right center; /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
+} 
+.choosen {
+    background-image: linear-gradient(to right, #696969 0%, #cacaca  51%, #696969  100%);
+}
+.correct {
+    background-image: linear-gradient(to right, #005e07 0%, #73f63b  51%, #005e07  100%);
+}
+.false {
+    background-image: linear-gradient(to right, #f63b3b 0%, #f2f12f  51%, #f63b3b  100%);
+}
+
+.hideItem {
+	scale: 0;
+	transition: all 0.3s ease-out;
+}
+
+.showItem {
+	scale: 1;
+	transition: all 0.3s ease-out;
+}
+
+.opacity-back {
+    background: rgb(0 0 0 / 66%);
+}
+
+
+
+.top-1half {
+	top: 0.4rem;
+}
+
+.tableh2 {
+	font-size: 26px;
+	margin-bottom: 10px;
+	text-align: start;
+	small {
+	  font-size: 0.5em;
+	}
+  }
+.finalTableColor {
+	background-color: #FFE306
+}
+.text-oveflow {
+	text-align: start;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.text-2xs {
+	font-size: 0.6rem;
+	line-height: 0.7rem;
+}
+.blue-box {
+	background: linear-gradient(0deg, rgb(255 255 255) 0%, rgb(194 199 206 / 50%) 100%)
+}
+
+.nice-bg {
+	background: linear-gradient(21deg, #0c90d7, #00d8a9);
+}
+
+.hover-scale:hover {
+	transition: 0.5s all;
+	box-shadow: 1px -4px 18px #13917645, -5px 2px 12px #21b0fdbf;;
+}
+.bg-opacity {
+	background: #202c376e
+}
+
+.h-inherit {
+	height: inherit;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+.ubuntu-light {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 300;
+	font-style: normal;
+  }
+  
+  .ubuntu-regular {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 400;
+	font-style: normal;
+  }
+  
+  .ubuntu-medium {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 500;
+	font-style: normal;
+  }
+  
+  .ubuntu-bold {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 700;
+	font-style: normal;
+  }
+  
+  .ubuntu-light-italic {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 300;
+	font-style: italic;
+  }
+  
+  .ubuntu-regular-italic {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 400;
+	font-style: italic;
+  }
+  
+  .ubuntu-medium-italic {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 500;
+	font-style: italic;
+  }
+  
+  .ubuntu-bold-italic {
+	font-family: "Ubuntu", sans-serif;
+	font-weight: 700;
+	font-style: italic;
+  }
+
+  .min-h-112 {
+	min-height: 28rem;
+  }
