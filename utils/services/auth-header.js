@@ -10,9 +10,7 @@ export async function authHeader(needToken = true, headers = {'Content-Type': 'a
     let user
     const userStore = useUserStore()
     let headerswww = useRequestHeaders(['cookie'])
-    console.log('headerswww',headerswww)
        var cookieAll = headerswww.cookie ? Cookie.parse(headerswww.cookie) : {}
-       console.log('cookieAll',cookieAll)
     user = userStore.user;
     if (needToken) {
         user = userStore.user;

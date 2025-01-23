@@ -86,11 +86,11 @@ export const login = async (req: Request, res: Response, next: Function) => {
     } else {
       const match = await isPasswordMatch(password, user.password);
       if (!match) {
-        throw createError.Unauthorized(req.t("userNotFound"));
+        throw createError(400, req.t("userNotFound"))
       } else {
         let token = await generateUserTokens(user, req, res)
 
-        let team = await prisma.teamUser.findFirst({where: {user_id: user.id}, include:{Team: true}})
+        
         res.json({
           success: true,
           user: {
@@ -102,7 +102,6 @@ export const login = async (req: Request, res: Response, next: Function) => {
             username: user.username, 
             avatar: user.avatar, 
             token,
-            team: team ? {isAdmin: team.isAdmin, isCreator: team.isCreator, ...team.Team} : null
           }
         })
       }

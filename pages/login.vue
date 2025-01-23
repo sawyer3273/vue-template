@@ -64,15 +64,17 @@ fpPromise
 
 const submitForm = async () => {
   const result = $v.value.$validate();
+  console.log('start')
   result.then(async (res) => {
     if(res) {
       let data = await userService.login({email: form.login, password: form.pass})
+      console.log('data',data)
       if (data && data.success) {
         router.push('/');
       }
     }
   }).catch((err) => {
-    console.log(err);
+    console.log('error on login', err);
   })
 };
 
