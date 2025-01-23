@@ -1,4 +1,5 @@
 import Cookie from 'cookie'
+import { useUserStore } from '@/stores/user'
 
 export default defineNuxtRouteMiddleware((to, from) => {
     let cookies: any

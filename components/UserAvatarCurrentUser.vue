@@ -1,4 +1,5 @@
 <script setup>
+import { useUserStore } from '@/stores/user'
 let userStore = useUserStore()
 </script>
 

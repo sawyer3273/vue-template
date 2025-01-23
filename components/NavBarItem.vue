@@ -3,7 +3,7 @@ import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 import { NuxtLink } from '#components'
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useMainStore } from '@/stores/main.js'
-
+import { useUserStore } from '@/stores/user'
 const props = defineProps({
   item: {
     type: Object,

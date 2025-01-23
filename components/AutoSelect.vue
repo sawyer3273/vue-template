@@ -4,6 +4,7 @@ import  _ from 'lodash'
 import { dataService } from '~/utils/services/data.service'
 import { useDebounceFn } from "@vueuse/core"
 import { useComponentStore } from '@/stores/component'
+import { useUserStore } from '@/stores/user'
 import outside from "@venegrad/vue3-click-outside"
 
 const componentStore = useComponentStore()
