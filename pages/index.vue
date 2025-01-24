@@ -6,12 +6,14 @@ import { containerMaxW } from '@/configs/config'
 import { useVuelidate } from '@vuelidate/core'
 import { required, minLength } from '@vuelidate/validators'
 import Slider from '@vueform/slider'
+import { mdiMap } from '@mdi/js';
 import GeoTIFF, { fromUrl, fromUrls, fromArrayBuffer, fromBlob } from 'geotiff';
 definePageMeta({
   middleware: 'auth' 
 })
 const mainStore = useMainStore()
-
+const route = useRoute()
+const router = useRouter()
 const form = reactive({
   file: null, 
   photo: null,
@@ -37,23 +39,55 @@ const rules = computed(() => (
 ));
 const $v = useVuelidate(rules, form);
 
-onMounted(() => {
-console.log('window',window)
-   initVk()
-
+const maps = ref(false)
+onMounted(async () => {
+  if (route.query.map) {
+    getMap(route.query.map)
+  }
+ 
+  getMaps()
 })
+
+const selected = ref(null)
+async function getMap(id) {
+  selected.value = id
+  router.push({ path: '/', query: { map: id }})
+ let data = await hikeService.getMap({
+   id
+  })
+  if (data.success) {
+      allCoords.value = data.data.Coordinates
+      initMap()
+  }
+  
+}
+
+async function getMaps() {
+  let data = await hikeService.getMaps()
+  if (data.success) {
+    maps.value = data.data
+  }
+  
+}
 
 useHead({
   script: [
     {src: 'https://api-maps.yandex.ru/2.1/?apikey=c42fd476-4925-4244-86c2-38fdf2ccbfd4&lang=en_US'},
-    { src: "https://yastatic.net/s3/mapsapi-jslibs/heatmap/0.0.1/heatmap.min.js" }, {src: 'https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js'}],
+    { src: "https://yastatic.net/s3/mapsapi-jslibs/heatmap/0.0.1/heatmap.min.js" }],
 });
 
 
-
+const isOpened = computed(() => {
+  if (route.query.map) {
+    return true
+  }
+  return false
+})
 
 watch(() => form.file, async () => {
     if (form.file) {
+        router.push({ path: '/', })
+        selected.value = null
         mainStore.setLoader(true)
         let formData = new FormData()
         for (let i = 0; i < form.file.length; i++) {
@@ -85,18 +119,28 @@ watch(intensityOfMidpoint, () => {
     );
 })
 
+const isModal = ref(false)
+const name = ref('')
+async function openModal() {
+  isModal.value = true
+  
+}
 async function save() {
-  let data = await hikeService.addHike({
-    allCoords
+  mainStore.setLoader(true)
+ let data = await hikeService.addHike({
+    allCoords: allCoords.value,
+    name: name.value
   })
   if (data.success) {
-  
+  isModal.value = false
   }
+  getMaps()
+  mainStore.setLoader(false)
 }
 
 
-
 async function initMap() {
+  console.log(' allCoords.value', allCoords.value)
   if (heatmap) {
     var newData = allCoords.value
     heatmap.setData(newData);
@@ -132,44 +176,6 @@ async function initMap() {
    
 }
 
-function initVk() {
- if ('VKIDSDK' in window) {
-      const VKID = window.VKIDSDK;
-
-      VKID.Config.init({
-        app: 52929456,
-        redirectUrl: 'https://vk.com/id25819806',
-        responseMode: VKID.ConfigResponseMode.Callback,
-        source: VKID.ConfigSource.LOWCODE,
-        scope: '', // Заполните нужными доступами по необходимости
-      });
-
-      const oneTap = new VKID.OneTap();
-
-      oneTap.render({
-        container: document.getElementById('test'),
-        showAlternativeLogin: true
-      })
-      .on(VKID.WidgetEvents.ERROR, vkidOnError)
-      .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {
-        const code = payload.code;
-        const deviceId = payload.device_id;
-
-        VKID.Auth.exchangeCode(code, deviceId)
-          .then(vkidOnSuccess)
-          .catch(vkidOnError);
-      });
-    
-      function vkidOnSuccess(data) {
-        // Обработка полученного результата
-      }
-    
-      function vkidOnError(error) {
-        // Обработка ошибки
-      }
-    }
-}
-
 
 
 
@@ -187,9 +193,10 @@ function initVk() {
                             <div class='col-md-6 flex'>
                               <FormFilePicker v-model="form.file" label="Загрузите треки в формате GPX" :autoUpload='false' :isMultiple='true'/>
                               <BaseButton
-                                v-if='showRadius'
-                                @click='save'
-                                label="Сохранить"
+                                v-if='showRadius && !isOpened'
+                                @click='openModal'
+                                label="Опубликовать"
+                                class='font-bold'
                                 color="info"
                               />
                             </div>
@@ -210,7 +217,27 @@ function initVk() {
                           <div id="test"></div>
                         </CardBox>
                     </div>
-                    
+
+                    <div class="col-md-12 mt-3 flex items-center justify-center" v-if='maps && maps.length'>
+                    <CardBox class='w-full h-full '  >
+                      <div class='flex'>
+                        <label>Сохраненные карты:</label>
+                        <div v-for='map in maps' class='flex rounded-full px-2 font-medium border bg-white border-gray-300 ml-2 cursor-pointer hover:bg-gray-100 hover:shadow-md' 
+                          :class='selected == map.id ? "!bg-gray-200 shadow-md" : ""' @click='getMap(map.id)'>
+                            <BaseIcon :path='mdiMap' /> {{map.title}} 
+                          </div>
+                      </div> 
+                    </CardBox>
+                    </div>
+                    <CardBoxModal v-model="isModal">
+                      <FormControl v-model='name' placeholder="Введите имя" />
+                      <BaseButton
+                          v-if='showRadius'
+                          @click='save'
+                          label="Сохранить"
+                          color="info"
+                        />
+                    </CardBoxModal>
                 </div>
             </div>
         </div>
@@ -221,14 +248,14 @@ function initVk() {
  .map {
   width: 100%; 
   min-height: 300px; 
-  height: calc(50vh - 200px); 
+  height: calc(50vh - 250px); 
   max-height: 100vh;
  }
  @media (min-width: 500px) {
   .map {
   width: 100%; 
   min-height: 300px; 
-  height: calc(100vh - 200px); 
+  height: calc(100vh - 250px); 
   max-height: 100vh;
  }
  }

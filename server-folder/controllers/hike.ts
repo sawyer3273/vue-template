@@ -69,20 +69,16 @@ export async function parseTrack(req: any, ress: Response, _next: NextFunction) 
 
 export async function addHike(req: Request, res: Response, _next: NextFunction) {
   try {
-    if (req.file) {
-    
-     console.log('req',req.file)
 
-     const GPX = new DOMParser().parseFromString(req.file.buffer.toString(), 'text/xml');
-    const converted: any = gpx(GPX);
-    let allCoordinates = converted.features[0].geometry.coordinates.map((item: any) => [item[1], item[0]])
-    let someCoordinates = allCoordinates.filter((el: any, index: number) => index % 100 == 0)
-    let centerMap = [allCoordinates[0][0] + (allCoordinates[allCoordinates.length - 1][0] - allCoordinates[0][0]) / 2, allCoordinates[0][1] + (allCoordinates[allCoordinates.length - 1][1] - allCoordinates[0][1]) / 2]
+    console.log('req.body',req.body)
+    if (req.body.allCoords && req.body.allCoords.length > 0) {
     
+     console.log('req',req.body.allCoords)
+
    
     let post = await prisma.post.create({
       data: {
-        title: req.body.title,
+        title: req.body.name,
         text: req.body.text || '',
         date: req.body.date ? new Date(req.body.date) : new Date(),
        // user_id: res.locals.auth.id
@@ -93,26 +89,33 @@ export async function addHike(req: Request, res: Response, _next: NextFunction) 
       data: {
         post_id: post.id,
       //  user_id: res.locals.auth.id,
-        centerLng: centerMap[0],
-        centerLat: centerMap[1]
+        centerLng: 43.5,
+        centerLat: 42
       },
     });
-    for (let i = 0; i < someCoordinates.length; i++) { 
-      let coordinate = await prisma.coordinate.create({
-        data: {
-          //user_id: res.locals.auth.id,
-          lng: someCoordinates[i][0],
-          lat: someCoordinates[i][1],
-          track_id: track.id
-        },
-      });
-      console.log('coordinate',coordinate)
+    
+    let promises = []
+    for (let i = 0; i < req.body.allCoords.length; i++) {
+      promises[i] = new Promise((resolve) => {
+        try {
+          let qwe =  prisma.coordinate.create({
+            data: {
+              //user_id: res.locals.auth.id,
+              lng: req.body.allCoords[i][0],
+              lat: req.body.allCoords[i][1],
+              track_id: track.id
+            },
+          });
+          resolve(qwe);
+        } catch (err) {
+          resolve(false)
+        }
+      })
     }
-
+    let test = await Promise.all(promises)
 
     return res.json({
         success: true,
-        data: {all: allCoordinates, start: allCoordinates[0], end: allCoordinates[allCoordinates.length - 1], some: someCoordinates, center: centerMap}
       });
     } else {
       return res.json({
@@ -141,13 +144,47 @@ export async function getUserCooridates(req: Request, res: Response, _next: Next
     return errorHandler(createError.InternalServerError(), req, res)
   }
 }
+export async function getMaps(req: Request, res: Response, _next: NextFunction) {
+  try {
+    
+    let data = await prisma.post.findMany({where: {}})
+   
+    return res.json({
+        success: !!data,
+        data
+      });
+    
+  } catch (err) {
+    console.log('err',err)
+    return errorHandler(createError.InternalServerError(), req, res)
+  }
+}
 
+export async function getMap(req: Request, res: Response, _next: NextFunction) {
+  try {
+    
+    let data = await prisma.track.findFirst({where: {post_id: parseInt(req.query.id)}, include: {Coordinates: true}})
+    if (data) {
+      data.Coordinates = data.Coordinates.map((item: any) => [item.lng, item.lat])
+    }
+    return res.json({
+        success: !!data,
+        data
+      });
+    
+  } catch (err) {
+    console.log('err',err)
+    return errorHandler(createError.InternalServerError(), req, res)
+  }
+}
 // Mounted in routes.ts
 export const routes: RouteConfig = {
   routes: [
-    { method: 'post', path: '/add', handler: [upload.single('file'), addHike] },
+    { method: 'post', path: '/add', handler: [addHike] },
     { method: 'post', path: '/parseTrack', handler: [ upload.array('file[]', 50), parseTrack] },
     { method: 'get', path: '/userCoordinates', handler: [ getUserCooridates] },
+    { method: 'get', path: '/maps', handler: [ getMaps] },
+    { method: 'get', path: '/map', handler: [ getMap] },
     
    
     

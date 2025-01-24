@@ -6,17 +6,19 @@ const baseURL = ''
 export const hikeService = {
     addHike,
     parseTrack,
-    getUserCooridates
+    getUserCooridates,
+    getMaps,
+    getMap
 };
 
 
 async function addHike(form) {
     const requestOptions = {
         method: 'POST',
-        headers: await authHeader(true, {}),
-        body: form
+        headers: await authHeader(false),
+        body: JSON.stringify(form)
     };
-    return fetchWithRetry(`${baseURL}/api/hike/add`, requestOptions)
+    return fetch(`${baseURL}/api/hike/add`, requestOptions)
         .then(handleResponse)
         .then(resp => {
             return resp;
@@ -35,11 +37,26 @@ async function parseTrack(form) {
             return resp;
         });
 }
-async function getUserCooridates(token) {
+async function getUserCooridates() {
     const requestOptions = {
         method: 'GET',
         headers: await authHeader(false),
     };
     return fetchWithRetry(`${baseURL}/api/hike/userCoordinates`, requestOptions).then(handleResponse)
+}
+async function getMaps() {
+    const requestOptions = {
+        method: 'GET',
+        headers: await authHeader(false),
+    };
+    return fetchWithRetry(`${baseURL}/api/hike/maps`, requestOptions).then(handleResponse)
+}
+
+async function getMap(data) {
+    const requestOptions = {
+        method: 'GET',
+        headers: await authHeader(false),
+    };
+    return fetchWithRetry(`${baseURL}/api/hike/map?` + new URLSearchParams(data), requestOptions).then(handleResponse)
 }
 

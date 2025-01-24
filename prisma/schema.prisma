@@ -73,6 +73,7 @@ model Track {
   centerLat    Float
   post_id      Int @unique
   Post         Post     @relation(fields: [post_id], references: [id])
+  coords       String?
   Coordinates  Coordinate[]
   createdAt    DateTime @default(now())
 }
