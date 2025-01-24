@@ -35,6 +35,9 @@ model User {
   avatar          String?
   rate            Int               @default(0)
   userTokens      userAuthTokens[]
+  Posts           Post[]
+  Tracks           Track[]
+  Coordinates       Coordinate[]
 }
 
 model userAuthTokens {
@@ -50,3 +53,37 @@ model userAuthTokens {
   createdAt    DateTime @default(now())
 }
 
+model Post {
+  id           Int      @id @default(autoincrement())
+  user_id      Int?
+  user         User?     @relation(fields: [user_id], references: [id])
+  title        String?
+  text         String?
+  date         DateTime?
+  track_id     Int?
+  Track        Track?  
+  createdAt    DateTime @default(now())
+}
+
+model Track {
+  id           Int      @id @default(autoincrement())
+  user_id      Int?
+  User         User?     @relation(fields: [user_id], references: [id])
+  centerLng    Float
+  centerLat    Float
+  post_id      Int @unique
+  Post         Post     @relation(fields: [post_id], references: [id])
+  Coordinates  Coordinate[]
+  createdAt    DateTime @default(now())
+}
+
+model Coordinate {
+  id           Int      @id @default(autoincrement())
+  user_id      Int?
+  User         User?     @relation(fields: [user_id], references: [id])
+  lng          Float
+  lat          Float
+  track_id     Int
+  Track        Track  @relation(fields: [track_id], references: [id])
+  createdAt    DateTime @default(now())
+}

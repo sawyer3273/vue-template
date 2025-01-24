@@ -2,6 +2,7 @@ import Cookie from 'cookie'
 import { useUserStore } from '@/stores/user'
 
 export default defineNuxtRouteMiddleware((to, from) => {
+    /*
     let cookies: any
     if (import.meta.server) {
         
@@ -17,4 +18,5 @@ export default defineNuxtRouteMiddleware((to, from) => {
     if (cookies && cookies.user && cookies.user.token) {
         return navigateTo('/');
     }
+        */
 })

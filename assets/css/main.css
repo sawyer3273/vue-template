@@ -8,6 +8,6 @@
 @import '_progress.css';
 @import '_scrollbars.css';
 @import '_table.css';
-
+@import '@vueform/slider/themes/default.css';
 @import '_custom.css';
 @import url('https://fonts.cdnfonts.com/css/ds-marker-felt');

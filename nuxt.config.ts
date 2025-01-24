@@ -40,7 +40,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      PORT: '8000',
+      PORT: '80',
       SOCKET_PORT: process.env.SOCKET_PORT ? process.env.SOCKET_PORT : '3000',
       SOCKET_URL: process.env.SOCKET_URL ? process.env.SOCKET_URL : "http://localhost:3000",
       bdUrl: process.env.DATABASE_URL,

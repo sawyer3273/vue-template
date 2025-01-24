@@ -33,7 +33,18 @@ const props = defineProps({
     type: String,
     default: 'video'
   },
-  isRoundIcon: Boolean
+  inputId: {
+    type: String
+  },
+  isMultiple: {
+    default: false,
+    type: Boolean
+  },
+  isRoundIcon: Boolean,
+  autoUpload: {
+    default: true,
+    type: Boolean
+  }
 })
 
 const emit = defineEmits(['update:modelValue', 'onUpload'])
@@ -57,27 +68,26 @@ watch(modelValueProp, (value) => {
 })
 
 const upload = async (event) => {
-  const value = event.target.files || event.dataTransfer.files
-
-  file.value = value[0]
-
-  emit('update:modelValue', file.value)
-
-  let formData = new FormData()
-  formData.append('file', file.value)
-  formData.append("type", props.type)
-  if (props.url) {
-    formData.append("toDelete", props.url)
-  }
-  const mediaStoreRoute = `/api/admin/upload`
-  loader.value = true
-  let fileData = await adminService.uploadFile(formData)
-  loader.value = false
-  
-  if (fileData.success) {
-    emit('onUpload', fileData.data)
-  } else {
-  }
+    const value = event.target.files || event.dataTransfer.files
+    file.value = props.isMultiple ? value : value[0]
+    emit('update:modelValue', file.value)
+    if (props.autoUpload) {
+      let formData = new FormData()
+      formData.append('file', file.value)
+      formData.append("type", props.type)
+      if (props.url) {
+        formData.append("toDelete", props.url)
+      }
+      const mediaStoreRoute = `/api/admin/upload`
+      loader.value = true
+      let fileData = await adminService.uploadFile(formData)
+      loader.value = false
+      
+      if (fileData.success) {
+        emit('onUpload', fileData.data)
+      } else {
+      }
+    }
 }
 
 
@@ -99,16 +109,18 @@ const upload = async (event) => {
       <input
         ref="root"
         type="file"
+        :multiple='isMultiple'
         class="absolute top-0 left-0 w-full h-full opacity-0 outline-none cursor-pointer -z-1"
         :accept="accept"
         @input="upload"
+        :id='inputId'
       />
     </label>
     <div
-      v-if="showFilename"
+      v-if="showFilename && !isMultiple"
       class="px-4 py-2 bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 border rounded-r"
     >
-      <span class="text-ellipsis line-clamp-1">
+      <span  class="text-ellipsis line-clamp-1">
         {{ file.name }}
       </span>
     </div>
