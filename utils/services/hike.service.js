@@ -28,7 +28,7 @@ async function addHike(form) {
 async function parseTrack(form) {
     const requestOptions = {
         method: 'POST',
-        headers: await authHeader(true, {}),
+        headers: await authHeader(false, {}),
         body: form
     };
     return fetch(`${baseURL}/api/hike/parseTrack`, requestOptions)
