@@ -16,6 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const form = reactive({
   file: null, 
+  fileAdd: null,
   photo: null,
   title: '',
   date: ''
@@ -106,6 +107,29 @@ watch(() => form.file, async () => {
     }
    
 })
+//TODO: code duplicate
+watch(() => form.fileAdd, async () => {
+    if (form.fileAdd) {
+        router.push({ path: '/', })
+        selected.value = null
+        mainStore.setLoader(true)
+        let formData = new FormData()
+        for (let i = 0; i < form.fileAdd.length; i++) {
+            formData.append("file[]", form.fileAdd[i]);
+        }
+    
+        formData.append('title', form.title)
+        let data = await hikeService.parseTrack(formData)
+        if (data.success) {
+            allCoords.value = allCoords.value.concat(data.allCoords)
+            centerMap.value = data.centerMapGeneral
+            initMap()
+        }
+       
+        mainStore.setLoader(false)
+    }
+   
+})
 watch(radiusIdx, () => {
    // initMap()
    heatmap.options.set(
@@ -140,7 +164,7 @@ async function save() {
 
 
 async function initMap() {
-  console.log(' allCoords.value', allCoords.value)
+  console.log(' allCoords.value', allCoords.value.length)
   if (heatmap) {
     var newData = allCoords.value
     heatmap.setData(newData);
@@ -190,15 +214,22 @@ async function initMap() {
                     <div class="col-md-12 flex items-center justify-center">
                         <CardBox class='w-full' is-form >
                           <div class='row mb-4'>
-                            <div class='col-md-6 flex'>
-                              <FormFilePicker v-model="form.file" label="Загрузите треки в формате GPX" :autoUpload='false' :isMultiple='true'/>
-                              <BaseButton
-                                v-if='showRadius && !isOpened'
-                                @click='openModal'
-                                label="Опубликовать"
-                                class='font-bold'
-                                color="info"
-                              />
+                            <div class='col-md-6  text-xs'>
+                              <div class='flex w-full flex-wrap'>
+                                  <FormFilePicker v-model="form.file" class='w-full' label="Создать новую карту" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
+                                
+                                  <FormFilePicker v-if='showRadius && !isOpened' v-model="form.fileAdd" label="Добавить треки" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
+                               
+
+                                <BaseButton
+                                  v-if='showRadius && !isOpened'
+                                  @click='openModal'
+                                  label="Опубликовать"
+                                  class='font-bold w-full md:w-auto h-10'
+                                  color="info"
+                                />
+                              </div>
+                                  <span class='text-gray-400 font-bold text-xs'>Загрузите треки в формате GPX</span>
                             </div>
                             <div class='col-md-6'>
                               <template v-if='showRadius'>

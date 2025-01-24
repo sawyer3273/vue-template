@@ -94,12 +94,12 @@ const upload = async (event) => {
 </script>
 
 <template>
-  <div class="flex items-stretch justify-start relative">
-    <label class="inline-flex">
+  <div class="flex items-stretch justify-start relative w-full md:w-auto">
+    <label class="inline-flex w-full md:w-auto">
       <BaseButton
         as="a"
         :loader='loader'
-        :class="{ 'w-12 h-12': isRoundIcon, 'rounded-r-none': showFilename }"
+        :class="{ 'w-12 h-12': isRoundIcon, 'rounded-r-none': showFilename, 'w-full md:w-auto': true}"
         :icon-size="isRoundIcon ? 24 : undefined"
         :label="isRoundIcon ? null : label"
         :icon="icon"
