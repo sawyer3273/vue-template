@@ -19,7 +19,7 @@ export async function parseTrack(req: any, ress: Response, _next: NextFunction) 
       let data: any = []
       let time = new Date().getTime() 
 
-     console.log('req',req.files)
+     console.log('start',req.files.length)
       let allCoords: any = []
       let promises = []
       for (let i = 0; i < req.files.length; i++) {
@@ -34,13 +34,10 @@ export async function parseTrack(req: any, ress: Response, _next: NextFunction) 
         })
       }
       let result: any = await Promise.all(promises)
-      console.log('result',result)
       
       for (let i = 0; i < result.length; i++) {
         let converted = result[i]
         let allCoordinates = converted.features[0].geometry.coordinates.map((item: any) => [item[1], item[0]])
-        console.log('allCoordinates',allCoordinates)
-        console.log('Math.floor(allCoordinates.length / 100)',Math.ceil(allCoordinates.length / 50))
         let someCoordinates = allCoordinates.filter((item: any, index: number) => index % Math.ceil(allCoordinates.length / 50) == 0)
         let centerMap = [allCoordinates[0][0] + (allCoordinates[allCoordinates.length - 1][0] - allCoordinates[0][0]) / 2, allCoordinates[0][1] + (allCoordinates[allCoordinates.length - 1][1] - allCoordinates[0][1]) / 2]
         let props = converted.features[0].properties
@@ -51,6 +48,8 @@ export async function parseTrack(req: any, ress: Response, _next: NextFunction) 
     
     let centerMapGeneral = [42,42]
 
+    let time2 = new Date().getTime() 
+    console.log('end',time2- time)
     return ress.json({
         success: true,
         data: data,
