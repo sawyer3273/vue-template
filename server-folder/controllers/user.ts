@@ -212,7 +212,7 @@ export const refreshToken = async (req: any, res: Response, next: Function) => {
     } else {
       success = false
     }
-    throw createError(400, req.t("userNotFound"))
+    throw createError(200, req.t("userNotFound"))
     
     
   } catch (error) {

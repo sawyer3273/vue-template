@@ -2,7 +2,7 @@
 defineProps({
   class: {
     type: String,
-    default: 'w-8'
+    default: 'w-14'
   },
 })
 </script>

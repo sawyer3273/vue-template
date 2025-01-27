@@ -5,7 +5,9 @@ import menuAside from '@/configs/menuAside'
 import menuNavBar from '@/configs/menuNavBar'
 import { useDarkModeStore } from '@/stores/darkMode.js'
 import { useMainStore } from '@/stores/main'
+import { useUserStore } from '@/stores/user'
 const mainStore = useMainStore()
+const userStore = useUserStore()
 import { userService } from '~/utils/services/user.service'
 
 const layoutAsidePadding = ''
@@ -30,8 +32,11 @@ const menuClick = async (event, item) => {
   if (item.isLogout) {
     let data = await userService.logout()
     if (data && data.success) {
-      router.push('/login');
+     // router.push('/login');
     }
+  }
+  if (item.myMap) {
+    router.push({ path: '/', query: { map: userStore.user.id }})
   }
 }
 </script>

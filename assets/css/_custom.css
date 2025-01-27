@@ -344,3 +344,7 @@ label {
   .min-h-112 {
 	min-height: 28rem;
   }
+
+  .min-h-screen {
+	min-height: calc(100vh - 7.6rem);
+  }

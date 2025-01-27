@@ -12,8 +12,8 @@ export default [
     menu: [
       {
         icon: mdiAccount,
-        label: 'Мой профиль',
-        to: '/account/my'
+        label: 'Моя карта',
+        myMap: true
       },
       {
         isDivider: true

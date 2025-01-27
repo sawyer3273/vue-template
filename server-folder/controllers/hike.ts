@@ -2,15 +2,16 @@ import type { RouteConfig } from '../routes/resourceHelper'
 import type { Request, Response, NextFunction } from 'express'
 import createError from "http-errors";
 import { errorHandler } from '../middlewares/errorHandler';
-import { afterSignupAuth, isAdmin, validationMiddleware } from '../middlewares/common';
+import { afterSignupAuthNext, isAdmin, validationMiddleware } from '../middlewares/common';
 import { generateUniqueString } from '../lib/helpers';
+import { generateUserTokens } from '../lib/helpers';
 import multer from 'multer'
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
 import { gpx } from "@tmcw/togeojson";
 import { DOMParser } from 'xmldom'
 import prisma from '~/tools/prisma';
-
+import {register} from '~/server-folder/lib/helpers'
 
 export async function parseTrack(req: any, ress: Response, _next: NextFunction) {
   try {
@@ -69,30 +70,64 @@ export async function parseTrack(req: any, ress: Response, _next: NextFunction) 
 
 export async function addHike(req: Request, res: Response, _next: NextFunction) {
   try {
-
-    console.log('req.body',req.body)
+    let user: any
+    let userID = res?.locals?.auth?.id
+    if (userID ) {
+      let dataUser = await prisma.user.findFirst({
+        where: {
+          id: res.locals.auth.id
+        },
+      })
+      user = {
+        success: true,
+        data: dataUser
+      }
+    } else {
+      user = await register(req.body.name, req.body.password)
+    }
+    if (!user.success || !user.data) {
+      return errorHandler( createError(400, user.message || 'Ошибка при регистрации'), req, res)
+    }
+    let token = userID ? '': await generateUserTokens(user.data, req, res)
     if (req.body.allCoords && req.body.allCoords.length > 0) {
     
-     console.log('req',req.body.allCoords)
 
-   
-    let post = await prisma.post.create({
-      data: {
-        title: req.body.name,
-        text: req.body.text || '',
-        date: req.body.date ? new Date(req.body.date) : new Date(),
-       // user_id: res.locals.auth.id
-      },
-    });
+      let post = await prisma.post.findFirst({
+        where: {
+          user_id: user.data.id
+        },
+      })
+      let track: any = await prisma.track.findFirst({
+        where: {
+          user_id: user.data.id
+        },
+      })
+      if (!post) {
+        post = await prisma.post.create({
+          data: {
+            title: user.data.username,
+            text: req.body.text || '',
+            date: req.body.date ? new Date(req.body.date) : new Date(),
+            user_id: user.data.id
+          },
+        });
+        track = await prisma.track.create({
+          data: {
+            post_id: post.id,
+            user_id: user.data.id,
+            centerLng: 43.5,
+            centerLat: 42
+          },
+        });
+      } else {
+        await prisma.coordinate.deleteMany ({
+          where: {
+            user_id: user.data.id
+          }
+        })
+      }
     
-    let track = await prisma.track.create({
-      data: {
-        post_id: post.id,
-      //  user_id: res.locals.auth.id,
-        centerLng: 43.5,
-        centerLat: 42
-      },
-    });
+    
     
     let promises = []
     for (let i = 0; i < req.body.allCoords.length; i++) {
@@ -100,7 +135,7 @@ export async function addHike(req: Request, res: Response, _next: NextFunction) 
         try {
           let qwe =  prisma.coordinate.create({
             data: {
-              //user_id: res.locals.auth.id,
+              user_id: user.data.id,
               lng: req.body.allCoords[i][0],
               lat: req.body.allCoords[i][1],
               track_id: track.id
@@ -116,6 +151,8 @@ export async function addHike(req: Request, res: Response, _next: NextFunction) 
 
     return res.json({
         success: true,
+        token,
+        user: user.data
       });
     } else {
       return res.json({
@@ -163,7 +200,7 @@ export async function getMaps(req: Request, res: Response, _next: NextFunction) 
 export async function getMap(req: Request, res: Response, _next: NextFunction) {
   try {
     
-    let data = await prisma.track.findFirst({where: {post_id: parseInt(req.query.id)}, include: {Coordinates: true}})
+    let data = await prisma.track.findFirst({where: {user_id: parseInt(req.query.id)}, include: {Coordinates: true}})
     if (data) {
       data.Coordinates = data.Coordinates.map((item: any) => [item.lng, item.lat])
     }
@@ -180,7 +217,7 @@ export async function getMap(req: Request, res: Response, _next: NextFunction) {
 // Mounted in routes.ts
 export const routes: RouteConfig = {
   routes: [
-    { method: 'post', path: '/add', handler: [addHike] },
+    { method: 'post', path: '/add', handler: [afterSignupAuthNext, addHike] },
     { method: 'post', path: '/parseTrack', handler: [ upload.array('file[]', 50), parseTrack] },
     { method: 'get', path: '/userCoordinates', handler: [ getUserCooridates] },
     { method: 'get', path: '/maps', handler: [ getMaps] },

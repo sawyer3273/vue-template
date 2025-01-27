@@ -84,14 +84,14 @@ onBeforeUnmount(() => {
   <BaseDivider v-if="item.isDivider" nav-bar />
   <component
     :is="is"
-    v-else
+    v-else-if='item.isCurrentUser && userStore.user?.id  || !item.isCurrentUser'
     ref="root"
     class="block md:flex items-center relative cursor-pointer md:bg-none bg-gradient-to-r from-gray-600 to-black"
     :class="componentClass"
     :to="item.to ?? null"
     :target="item.target ?? null"
     @click="menuClick"
-  >
+  > 
     <div
       class="flex items-center hover:text-blue-500 md:bg-none"
       :class="{

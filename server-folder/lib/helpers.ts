@@ -5,6 +5,7 @@ import type { UserDataType } from "~/types/indexType";
 import jwt, { type Secret, type JwtPayload } from "jsonwebtoken";
 import createError from "http-errors";
 import moment from 'moment'
+import { encryptPassword, isPasswordMatch } from "../../utils/encryption";
 
 export type CustomRequest = Request & {
   email: string | JwtPayload;
@@ -100,3 +101,48 @@ export const generateUserTokens = async (user: User, req: any, res: Response) =>
     return accessToken
 }
 
+export const register = async (username: string, password: string) => {
+  try {
+      if (!username || !password) {
+        return {
+          success: false,
+          message: 'Имя или емайл не указаны'
+        }
+      }
+      let userObj = await prisma.user.findFirst({
+        where: {
+          OR: [  
+            {  email: username },
+            {  username: username },
+          ]}
+      });
+
+      if (userObj) {
+        return {
+          success: false,
+          message: 'Пользователь с таким именем существует'
+        }
+      }
+
+      let result = await prisma.user.create({
+        data: {
+          username: username,
+          email: username,
+          password: await encryptPassword(password),
+        },
+      });
+
+      return {
+        success: true,
+        message: 'User creaed',
+        data: result
+      };
+
+  } catch (err) {
+    console.log('err',err)
+    return {
+      success: false,
+      message: 'Error'
+    };
+  }
+}

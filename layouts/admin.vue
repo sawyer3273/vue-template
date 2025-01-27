@@ -30,7 +30,7 @@ const menuClick = async (event, item) => {
   if (item.isLogout) {
     let data = await userService.logout()
     if (data && data.success) {
-      router.push('/login');
+      //router.push('/login');
     }
   }
 }

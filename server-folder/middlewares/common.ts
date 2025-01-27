@@ -70,6 +70,43 @@ export const afterSignupAuth = async (req: any, res: Response, next: NextFunctio
   }
 }
 
+
+export const afterSignupAuthNext = async (req: any, res: Response, next: NextFunction) => {
+  console.log('req.originalUrl',req.originalUrl)
+  console.log('req body query',req.body ? JSON.stringify(req.body).substring(0, 1000) : '', req.query ? JSON.stringify(req.query).substring(0, 1000) : '')
+  if (req.headers.authorization) {
+    const authHeader = req.headers.authorization; //req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    jwt.verify(token, SECRET_KEY, async (err: any, decode: any) => {
+      if (err) {
+        console.log('invalid token 1')
+        next() 
+      } else {
+        let now = new Date().getTime() / 1000
+        let left = decode.exp - now 
+        if (left < 5) {
+          next() 
+        }
+
+        let isAuth = await checkAuthorization({...decode, token}, req)
+        if (!isAuth) {
+          next() 
+        }
+        res.locals.auth = {
+            id: decode.userId,
+            username: decode.username,
+            userEmail: decode.userEmail,
+            userRole: decode.userRole,
+         }
+        next()        
+      }
+    })
+  }  else {
+    next() 
+  }
+}
+
+
 export const checkAuthorization = async (user: UserDataType, req: any) => {
   let token = await prisma.userAuthTokens.findFirst({
       where: {

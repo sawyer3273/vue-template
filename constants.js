@@ -1,5 +1,5 @@
 
-export const PROJECT_NAME = "Tracking Heatmap"
+export const PROJECT_NAME = "Hikes Heatmap"
 
 export const NOTIF_SUCCESS = "success"
 export const NOTIF_FAIL = "danger"

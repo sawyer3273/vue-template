@@ -8,6 +8,9 @@ import { required, minLength } from '@vuelidate/validators'
 import Slider from '@vueform/slider'
 import { mdiMap } from '@mdi/js';
 import GeoTIFF, { fromUrl, fromUrls, fromArrayBuffer, fromBlob } from 'geotiff';
+import { useUserStore } from '@/stores/user'
+
+let userStore = useUserStore()
 definePageMeta({
   middleware: 'auth' 
 })
@@ -26,42 +29,62 @@ let centerMap = ref([])
 let radiusIdx = ref(5)
 let intensityOfMidpoint = ref(5)
 let showRadius = ref(false)
+let isUpdated = ref(false)
 let heatmap = reactive(null)
 const rules = computed(() => (
   {
-    title: {
+    name: {
       required, 
       minLength: minLength(3),
     },
-    file: {
-      required,
+    password: {
+      required, 
+      minLength: minLength(6),
     },
   }
 ));
-const $v = useVuelidate(rules, form);
+
+const formRegister = reactive({
+  name: '', 
+  password: '',
+})
+const $v = useVuelidate(rules, formRegister);
 
 const maps = ref(false)
 onMounted(async () => {
+  console.log('oute.query.map',route.query.map)
   if (route.query.map) {
     getMap(route.query.map)
-  }
- 
+  } 
+  initMap()
   getMaps()
 })
 
 const selected = ref(null)
 async function getMap(id) {
+  console.log('getMap',id)
   selected.value = id
   router.push({ path: '/', query: { map: id }})
- let data = await hikeService.getMap({
-   id
-  })
-  if (data.success) {
-      allCoords.value = data.data.Coordinates
+  let data = await hikeService.getMap({ id : id})
+    if (data.success) {
+        allCoords.value = data.data.Coordinates
+        initMap()
+    } else {
+      allCoords.value = []
       initMap()
   }
-  
 }
+
+watch(() => route.query.map, async () => {
+     isUpdated.value = false
+  if (route.query.map) {
+   getMap(route.query.map)
+  } else {
+      selected.value = null
+      allCoords.value = []
+      initMap()
+  }
+})
 
 async function getMaps() {
   let data = await hikeService.getMaps()
@@ -103,6 +126,7 @@ watch(() => form.file, async () => {
             initMap()
         }
        
+     isUpdated.value = true
         mainStore.setLoader(false)
     }
    
@@ -110,8 +134,8 @@ watch(() => form.file, async () => {
 //TODO: code duplicate
 watch(() => form.fileAdd, async () => {
     if (form.fileAdd) {
-        router.push({ path: '/', })
-        selected.value = null
+      //  router.push({ path: '/', })
+     //   selected.value = null
         mainStore.setLoader(true)
         let formData = new FormData()
         for (let i = 0; i < form.fileAdd.length; i++) {
@@ -126,6 +150,7 @@ watch(() => form.fileAdd, async () => {
             initMap()
         }
        
+     isUpdated.value = true
         mainStore.setLoader(false)
     }
    
@@ -144,22 +169,44 @@ watch(intensityOfMidpoint, () => {
 })
 
 const isModal = ref(false)
-const name = ref('')
 async function openModal() {
-  isModal.value = true
-  
+  if (userStore.user.id) {
+     mainStore.setLoader(true)
+      let data = await hikeService.addHike({
+        allCoords: allCoords.value
+      })
+      if (data.success) {
+      isModal.value = false
+      }
+      getMaps()
+      mainStore.setLoader(false)
+
+     isUpdated.value = false
+  } else {
+    isModal.value = true
+  }
 }
 async function save() {
-  mainStore.setLoader(true)
- let data = await hikeService.addHike({
-    allCoords: allCoords.value,
-    name: name.value
+  const result = $v.value.$validate();
+  result.then(async (res) => {
+    if(res) {
+      mainStore.setLoader(true)
+      let data = await hikeService.addHike({
+        allCoords: allCoords.value,
+        ...formRegister
+      })
+      if (data.success) {
+      isModal.value = false
+      }
+      getMaps()
+      mainStore.setLoader(false)
+     isUpdated.value = false
+    }
+  }).catch((err) => {
+    console.log(err);
   })
-  if (data.success) {
-  isModal.value = false
-  }
-  getMaps()
-  mainStore.setLoader(false)
+
+  
 }
 
 
@@ -168,6 +215,7 @@ async function initMap() {
   if (heatmap) {
     var newData = allCoords.value
     heatmap.setData(newData);
+    showRadius.value = allCoords.value.length > 0 ? true : false
   } else {
      const ymaps = window.ymaps;
       ymaps.ready(function () {
@@ -186,7 +234,7 @@ async function initMap() {
 
         ymaps.modules.require(['Heatmap'], function (Heatmap) {
     
-        showRadius.value = true
+        showRadius.value = allCoords.value.length > 0 ? true : false
         heatmap = new Heatmap(allCoords.value, {
             gradient: gradients[0],
             radius: radiusIdx.value * 1.35,
@@ -200,36 +248,38 @@ async function initMap() {
    
 }
 
-
+function changePage(id) {
+  router.push({ path: '/', query: { map: id }})
+}
 
 
 </script>
 
 <template>
   <div>
-    <NuxtLayout name="empty">
+    <NuxtLayout name="auth">
         <div class="w-full">
             <div class="flex items-center justify-center w-full  p-2 xl:px-0" >
                 <div class="row w-full" :class='containerMaxW'>
                     <div class="col-md-12 flex items-center justify-center">
                         <CardBox class='w-full' is-form >
-                          <div class='row mb-4'>
+                          <div class='row'>
                             <div class='col-md-6  text-xs'>
                               <div class='flex w-full flex-wrap'>
-                                  <FormFilePicker v-model="form.file" class='w-full' label="Создать новую карту" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
-                                
-                                  <FormFilePicker v-if='showRadius && !isOpened' v-model="form.fileAdd" label="Добавить треки" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
+                                  <FormFilePicker v-if='selected == userStore.user.id || !selected || !userStore.user.id && !selected ' v-model="form.fileAdd" label="Добавить треки (GPX)" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
+                                  <BaseButton color='base' v-else-if='userStore.user.id' class='w-full md:w-auto h-11 text-xs text-gray-400 font-bold cursor-pointer' label='Открыть свою карту' @click='changePage(userStore.user.id)'>  </BaseButton>
+                                  <FormFilePicker v-else v-model="form.file" class='w-full' label="Создать новую карту" accept=".gpx" :autoUpload='false' :isMultiple='true'/>
                                
 
                                 <BaseButton
-                                  v-if='showRadius && !isOpened'
+                                  v-if='showRadius && isUpdated'
                                   @click='openModal'
                                   label="Опубликовать"
-                                  class='font-bold w-full md:w-auto h-10'
+                                  class='font-bold w-full md:w-auto h-11'
                                   color="info"
                                 />
                               </div>
-                                  <span class='text-gray-400 font-bold text-xs'>Загрузите треки в формате GPX</span>
+                                  <span v-if='false' class='text-gray-400 font-bold text-xs'>Загрузите треки в формате GPX</span>
                             </div>
                             <div class='col-md-6'>
                               <template v-if='showRadius'>
@@ -244,6 +294,7 @@ async function initMap() {
                               </template>
                             </div>
                           </div>
+                          <label> </label>
                           <div id="map" class='map'></div>
                           <div id="test"></div>
                         </CardBox>
@@ -254,14 +305,22 @@ async function initMap() {
                       <div class='flex'>
                         <label>Сохраненные карты:</label>
                         <div v-for='map in maps' class='flex rounded-full px-2 font-medium border bg-white border-gray-300 ml-2 cursor-pointer hover:bg-gray-100 hover:shadow-md' 
-                          :class='selected == map.id ? "!bg-gray-200 shadow-md" : ""' @click='getMap(map.id)'>
+                          :class='selected == map.user_id ? "!bg-gray-200 shadow-md" : ""' @click='changePage(map.user_id)'>
                             <BaseIcon :path='mdiMap' /> {{map.title}} 
                           </div>
                       </div> 
                     </CardBox>
                     </div>
                     <CardBoxModal v-model="isModal">
-                      <FormControl v-model='name' placeholder="Введите имя" />
+                      <label>Регистрация</label>
+                      <div class='text-gray-400 text-xs'> Имя</div>
+                      <FormField   :error="$v.name.$error ? $t('error_'+$v.name.$errors[0].$validator) : ''">
+                        <FormControl v-model='formRegister.name' placeholder="Введите имя" />
+                      </FormField>
+                      <div class='text-gray-400 text-xs'> Пароль</div>
+                      <FormField   :error="$v.password.$error ? $t('error_'+$v.password.$errors[0].$validator) : ''">
+                        <FormControl v-model='formRegister.password' type='password' placeholder="Введите пароль" />
+                      </FormField>
                       <BaseButton
                           v-if='showRadius'
                           @click='save'
@@ -279,14 +338,14 @@ async function initMap() {
  .map {
   width: 100%; 
   min-height: 300px; 
-  height: calc(50vh - 250px); 
+  height: calc(50vh - 300px); 
   max-height: 100vh;
  }
  @media (min-width: 500px) {
   .map {
   width: 100%; 
   min-height: 300px; 
-  height: calc(100vh - 250px); 
+  height: calc(100vh - 300px); 
   max-height: 100vh;
  }
  }

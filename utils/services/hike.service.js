@@ -1,6 +1,7 @@
 import { authHeader } from './auth-header';
 import { handleResponse, fetchWithRetry } from './response';
 import { useDataStore } from '@/stores/data'
+import {parseUserObject} from './user.service'
 const baseURL = ''
 
 export const hikeService = {
@@ -15,12 +16,13 @@ export const hikeService = {
 async function addHike(form) {
     const requestOptions = {
         method: 'POST',
-        headers: await authHeader(false),
+        headers: await authHeader(true),
         body: JSON.stringify(form)
     };
     return fetch(`${baseURL}/api/hike/add`, requestOptions)
         .then(handleResponse)
         .then(resp => {
+            parseUserObject(resp.user)
             return resp;
         });
 }
